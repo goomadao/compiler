@@ -1,0 +1,13 @@
+﻿const a=5,b=4,c=3;
+var e,d,k,i,j;
+begin
+repeat
+	begin	
+		read(e);
+		k := 6 * i;
+		i := i + 1;
+		write(k);
+		write(i)
+	end
+until k = 5
+end.

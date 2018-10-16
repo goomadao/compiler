@@ -151,6 +151,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="grammar.h" />
+    <ClInclude Include="grammarDefinition.h" />
     <ClInclude Include="lexer.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="position.h" />
@@ -158,6 +160,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="compiler.cpp" />
+    <ClCompile Include="grammar.cpp" />
+    <ClCompile Include="grammarDefinition.cpp" />
     <ClCompile Include="lexer.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>

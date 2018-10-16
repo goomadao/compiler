@@ -1,0 +1,57 @@
+程序            :const, id, var, procedure, call, begin, ., ;, if, while, read, write,
+分程序          :const, id, var, procedure, call, begin, ;, if, while, read, write, ε,
+说明部分        :const, var, procedure, ;, ε,
+常量说明部分    :const, ε,
+常量定义表      :id,
+常量定义        :id,
+变量说明部分    :var, ε,
+变量表          :id,
+变量            :id,
+过程说明列表    :procedure, ;, ε,
+过程首部        :procedure,
+过程体          :const, id, var, procedure, call, begin, ;, if, while, read, write,
+语句            :id, call, begin, if, while, read, write, ε,
+赋值语句        :id,
+过程调用语句    :call,
+复合语句        :begin,
+条件语句        :if,
+当型循环语句    :while,
+读语句          :read,
+写语句          :write,
+语句表          :id, call, begin, ;, if, while, read, write, ε,
+读变量表        :id,
+读变量          :id,
+写表达式表      :id, integer, (, +, -,
+条件            :id, integer, (, odd, +, -,
+表达式          :id, integer, (, +, -,
+项              :id, integer, (,
+因子            :id, integer, (,
+程序+           :
+分程序+         :
+说明部分+       :
+常量说明部分+   :
+常量定义表+     :,, ε,
+常量定义+       :
+变量说明部分+   :
+变量表+         :,, ε,
+变量+           :
+过程说明列表+   :;, ε,
+过程首部+       :
+过程体+         :
+语句+           :
+赋值语句+       :
+过程调用语句+   :
+复合语句+       :
+条件语句+       :
+当型循环语句+   :
+读语句+         :
+写语句+         :
+语句表+         :;, ε,
+读变量表+       :,, ε,
+读变量+         :
+写表达式表+     :,, ε,
+条件+           :
+表达式+         :+, -, ε,
+项+             :*, /, ε,
+因子+           :
+表达式++        :=, <, <=, >, >=,

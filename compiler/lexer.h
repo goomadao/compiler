@@ -1,3 +1,7 @@
+
+#ifndef LEXER_H
+#define LEXER_H
+
 #include<string>
 #include<map>
 #include<vector>
@@ -5,10 +9,6 @@
 using std::string;
 using std::map;
 using std::vector;
-
-
-#ifndef LEXER_H
-#define LEXER_H
 
 enum symbol
 {

@@ -27,6 +27,12 @@
     <ClInclude Include="token.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="grammarDefinition.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="grammar.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -42,6 +48,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="lexer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="grammar.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="grammarDefinition.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

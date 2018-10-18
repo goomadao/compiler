@@ -11,51 +11,30 @@ Grammar::Grammar()
 {
 	getOriginGrammar();
 	getOriginList();
+
+	cout << "----------------原始文法：------------------\n";
+	printGrammarList();
 	//transportToList();
 	eliminateLeftRecursive();
 	//leftFactoring();
 
+	
+
+	//输出该list
+	cout << "----------------化简文法：------------------\n";
+	printGrammarList();
+	
 	getFirst();
-	//printFirst();
+	cout << "-----------------first:---------------\n";
+	printFirst();
 
 	getFollow();
+	cout << "----------------follow:----------------\n";
 	printFollow();
 
 	getParsingTable();
+	cout << "----------------parsingTable:----------------\n";
 	printParsingTable();
-
-	//输出该list
-	
-	//int djt = 1;
-	//list< list< vector<int> > >::iterator it = grammarList.begin();//it:list <list< vector<int> > >迭代器，指向某个list< vector<int> >
-	//for (; it != grammarList.end(); ++it, ++djt)
-	//{
-	//	cout << djt << ":\t";
-	//	list< vector<int> >::iterator iter = it->begin();//iter:list< vector<int> >迭代器，指向某个vector<int>
-	//	for (; iter != it->end(); ++iter)
-	//	{
-	//		for (int i = 0; i < iter->size(); ++i)
-	//		{
-	//			if (iter == it->begin())
-	//				cout << left << setw(16) << GrammarDefinition::GrammarSymTypes[iter->at(i)] << " ";
-	//			else
-	//				cout << GrammarDefinition::GrammarSymTypes[iter->at(i)] << " ";
-	//		}
-	//		list< vector<int> >::iterator temp = iter;
-	//		++temp;
-	//		if (iter == it->begin())
-	//		{
-	//			cout << "==>";
-	//		}
-	//		else if (temp != it->end())
-	//		{
-	//			cout << "|";
-	//		}
-	//	}
-	//	cout << "\n";
-	//}
-	
-
 	
 }
 
@@ -137,7 +116,12 @@ void Grammar::getOriginList()
 	grammarList.push_back(list< vector<int> >{vector<int>{VARDEFINITIONPART}, vector<int>{VAR, VARDEFINITIONTABLE, SEMICOLON}, vector<int>{EMPTY}});
 	grammarList.push_back(list< vector<int> >{vector<int>{VARDEFINITIONTABLE}, vector<int>{VARDEFINITIONTABLE, COMMA, VARDEFINITION}, vector<int>{VARDEFINITION}});
 	grammarList.push_back(list< vector<int> >{vector<int>{VARDEFINITION}, vector<int>{ID}});
-	grammarList.push_back(list< vector<int> >{vector<int>{PROCEDURELIST}, vector<int>{PROCEDURELIST, SEMICOLON, PROCEDUREHEADER, PROCEDUREBODY}, vector<int>{PROCEDUREHEADER, PROCEDUREBODY}, vector<int>{EMPTY}});
+	//辣鸡书上的
+	grammarList.push_back(list< vector<int> >{vector<int>{PROCEDURELIST}, vector<int>{PROCEDURELIST, PROCEDUREHEADER, PROCEDUREBODY}, vector<int>{EMPTY}});
+	//sb给的文法改成左递归
+	//grammarList.push_back(list< vector<int> >{vector<int>{PROCEDURELIST}, vector<int>{PROCEDURELIST, PROCEDUREHEADER, SUBPROCEDURE, SEMICOLON}, vector<int>{EMPTY}});
+	//sb给的文法改成右递归
+	//grammarList.push_back(list< vector<int> >{vector<int>{PROCEDURELIST}, vector<int>{ PROCEDUREHEADER, SUBPROCEDURE, SEMICOLON, PROCEDURELIST}, vector<int>{PROCEDUREHEADER, SUBPROCEDURE, SEMICOLON}, vector<int>{EMPTY}});
 	grammarList.push_back(list< vector<int> >{vector<int>{PROCEDUREHEADER}, vector<int>{PROCEDURE, ID, SEMICOLON}});
 	grammarList.push_back(list< vector<int> >{vector<int>{PROCEDUREBODY}, vector<int>{SUBPROCEDURE, SEMICOLON}});
 	grammarList.push_back(list< vector<int> >{vector<int>{STATEMENT}, vector<int>{ASSIGHNSTATEMENT}, vector<int>{CALLSTATEMENT}, vector<int>{COMPOUNDSTATEMENT}, vector<int>{CONTIDITIONSTATEMENT}, vector<int>{LOOPSTATEMENT}, vector<int>{READSTATEMENT}, vector<int>{WRITESTATEMENT}, vector<int>{EMPTY}});
@@ -199,6 +183,38 @@ void Grammar::getOriginList()
 	//	}
 	//	cout << "\n";
 	//}
+}
+
+void Grammar::printGrammarList()
+{
+	int djt = 1;
+	list< list< vector<int> > >::iterator it = grammarList.begin();//it:list <list< vector<int> > >迭代器，指向某个list< vector<int> >
+	for (; it != grammarList.end(); ++it, ++djt)
+	{
+		cout << djt << ":\t";
+		list< vector<int> >::iterator iter = it->begin();//iter:list< vector<int> >迭代器，指向某个vector<int>
+		for (; iter != it->end(); ++iter)
+		{
+			for (int i = 0; i < iter->size(); ++i)
+			{
+				if (iter == it->begin())
+					cout << left << setw(16) << GrammarDefinition::GrammarSymTypes[iter->at(i)] << " ";
+				else
+					cout << GrammarDefinition::GrammarSymTypes[iter->at(i)] << " ";
+			}
+			list< vector<int> >::iterator temp = iter;
+			++temp;
+			if (iter == it->begin())
+			{
+				cout << "==>";
+			}
+			else if (temp != it->end())
+			{
+				cout << "|";
+			}
+		}
+		cout << "\n";
+	}
 }
 
 //错误的List类型

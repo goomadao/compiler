@@ -12,27 +12,32 @@ Grammar::Grammar()
 	getOriginGrammar();
 	getOriginList();
 
-	cout << "----------------原始文法：------------------\n";
-	printGrammarList();
+	/*cout << "----------------原始文法：------------------\n";
+	printGrammarList();*/
 	//transportToList();
 	eliminateLeftRecursive();
 	//leftFactoring();
 
 	
 
+	
+	
+	getFirst();
+	
+
+	getFollow();
+	
+
+	getParsingTable();
+	
 	//输出该list
 	cout << "----------------化简文法：------------------\n";
 	printGrammarList();
-	
-	getFirst();
 	cout << "-----------------first:---------------\n";
 	printFirst();
-
-	getFollow();
+	
 	cout << "----------------follow:----------------\n";
 	printFollow();
-
-	getParsingTable();
 	cout << "----------------parsingTable:----------------\n";
 	printParsingTable();
 	
@@ -116,12 +121,7 @@ void Grammar::getOriginList()
 	grammarList.push_back(list< vector<int> >{vector<int>{VARDEFINITIONPART}, vector<int>{VAR, VARDEFINITIONTABLE, SEMICOLON}, vector<int>{EMPTY}});
 	grammarList.push_back(list< vector<int> >{vector<int>{VARDEFINITIONTABLE}, vector<int>{VARDEFINITIONTABLE, COMMA, VARDEFINITION}, vector<int>{VARDEFINITION}});
 	grammarList.push_back(list< vector<int> >{vector<int>{VARDEFINITION}, vector<int>{ID}});
-	//辣鸡书上的
 	grammarList.push_back(list< vector<int> >{vector<int>{PROCEDURELIST}, vector<int>{PROCEDURELIST, PROCEDUREHEADER, PROCEDUREBODY}, vector<int>{EMPTY}});
-	//sb给的文法改成左递归
-	//grammarList.push_back(list< vector<int> >{vector<int>{PROCEDURELIST}, vector<int>{PROCEDURELIST, PROCEDUREHEADER, SUBPROCEDURE, SEMICOLON}, vector<int>{EMPTY}});
-	//sb给的文法改成右递归
-	//grammarList.push_back(list< vector<int> >{vector<int>{PROCEDURELIST}, vector<int>{ PROCEDUREHEADER, SUBPROCEDURE, SEMICOLON, PROCEDURELIST}, vector<int>{PROCEDUREHEADER, SUBPROCEDURE, SEMICOLON}, vector<int>{EMPTY}});
 	grammarList.push_back(list< vector<int> >{vector<int>{PROCEDUREHEADER}, vector<int>{PROCEDURE, ID, SEMICOLON}});
 	grammarList.push_back(list< vector<int> >{vector<int>{PROCEDUREBODY}, vector<int>{SUBPROCEDURE, SEMICOLON}});
 	grammarList.push_back(list< vector<int> >{vector<int>{STATEMENT}, vector<int>{ASSIGHNSTATEMENT}, vector<int>{CALLSTATEMENT}, vector<int>{COMPOUNDSTATEMENT}, vector<int>{CONTIDITIONSTATEMENT}, vector<int>{LOOPSTATEMENT}, vector<int>{READSTATEMENT}, vector<int>{WRITESTATEMENT}, vector<int>{EMPTY}});

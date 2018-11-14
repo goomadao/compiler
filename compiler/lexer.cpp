@@ -1,10 +1,12 @@
+#include"pch.h"
 #include"lexer.h"
 #include<algorithm>
 #include<iostream>
+#include<bitset>
 using std::string;
 
-string Types[34]{ "ERROR", "ID", "NUM", "PLUSSYM", "MINUSSYM", "TIMESSYM", "DIVISIONSYM", "EQLSYM", "NEQLSYM", "LTSYM", "LESYM", "GTSYM", "GESYM", "BECOMESSYM",
-"LPARENSYM", "RPARENSYM", "SEMICOLONSYM","PERIODSYM", "COMMASYM","ODDSYM", "BEGINSYM","ENDSYM", "IFSYM", "THENSYM", "WHILESYM", "WRITESYM", "READSYM", "DOSYM",
+string Types[35]{ "ERROR", "ID", "NUM", "PLUSSYM", "MINUSSYM", "TIMESSYM", "DIVISIONSYM", "EQLSYM", "NEQLSYM", "LTSYM", "LESYM", "GTSYM", "GESYM", "BECOMESSYM",
+"LPARENSYM", "RPARENSYM", "SEMICOLONSYM","PERIODSYM", "COMMASYM","ODDSYM", "BEGINSYM","ENDSYM", "IFSYM", "THENSYM","ELSESYM", "WHILESYM", "WRITESYM", "READSYM", "DOSYM",
 "CALLSYM", "CONSTSYM", "VARSYM", "PROCSYM", "REPEATSYM","UNTILSYM" };
 
 int Lexer::next()
@@ -142,13 +144,18 @@ Lexer::Lexer(string t)
 	int leng = text.length();
 	int rr, rc, rn;
 	while (n < leng + 1)
-	{	
+	{
 		/*if (tokens.size())
 			cout << tokens[tokens.size() - 1].getVal() << " " << tokens[tokens.size() - 1].getVal().length() << "\n";*/
 		switch (type)
 		{
 		case EOF:
 		case NUL:
+			rr = r; rc = c - 1; rn = n - 1;
+			type = next();
+			table.insert(pair<string, Token>(text.substr(rn, n - rn - 1), Token(ERROR, text.substr(rn, n - rn - 1), rr, rc)));
+			tokens.push_back(Token(ERROR, text.substr(rn, n - rn - 1), rr, rc));
+			break;
 		case BLANK:
 			type = next();
 			//cout << "¿Õ¸ñ\n";
@@ -159,6 +166,25 @@ Lexer::Lexer(string t)
 			while (type == DIGIT)
 			{
 				type = next();
+			}
+			if (type == PERIOD)
+			{
+				type = next();
+				if (type != NUM)
+				{
+					table.insert(pair<string, Token>(text.substr(rn, n - rn - 2), Token(NUM, text.substr(rn, n - rn - 2), rr, rc)));
+					tokens.push_back(Token(NUM, text.substr(rn, n - rn - 2), rr, rc));
+					table.insert(pair<string, Token>(".", Token(PERIOD, ".", r, c)));
+					tokens.push_back(Token(PERIOD, ".", r, c));
+					break;
+				}
+				else
+				{
+					while (type == NUM)
+					{
+						type = next();
+					}
+				}
 			}
 			table.insert(pair<string, Token>(text.substr(rn, n - rn - 1), Token(NUM, text.substr(rn, n - rn - 1), rr, rc)));
 			tokens.push_back(Token(NUM, text.substr(rn, n - rn - 1), rr, rc));
@@ -214,6 +240,11 @@ Lexer::Lexer(string t)
 				{
 					table.insert(pair<string, Token>(text.substr(rn, n - rn + 1), Token(THENSYM, text.substr(rn, n - rn + 1), rr, rc)));
 					tokens.push_back(Token(THENSYM, text.substr(rn, n - rn + 1), rr, rc));
+				}
+				else if (revalue == "else")
+				{
+					table.insert(pair<string, Token>(text.substr(rn, n - rn + 1), Token(ELSESYM, text.substr(rn, n - rn + 1), rr, rc)));
+					tokens.push_back(Token(ELSESYM, text.substr(rn, n - rn + 1), rr, rc));
 				}
 				else if (revalue == "call")
 				{
@@ -307,51 +338,52 @@ Lexer::Lexer(string t)
 			type = next();
 			break;
 		case state::PLUS:
-			table.insert(pair<string, Token>("+", Token(symbol::PLUSSYM, "+", r, c-1)));
-			tokens.push_back(Token(symbol::PLUSSYM, "+", r, c-1));
+			table.insert(pair<string, Token>("+", Token(symbol::PLUSSYM, "+", r, c - 1)));
+			tokens.push_back(Token(symbol::PLUSSYM, "+", r, c - 1));
 			type = next();
 			break;
 		case state::MINUS:
-			table.insert(pair<string, Token>("-", Token(symbol::MINUSSYM, "-", r, c-1)));
-			tokens.push_back(Token(symbol::MINUSSYM, "-", r, c-1));
+			table.insert(pair<string, Token>("-", Token(symbol::MINUSSYM, "-", r, c - 1)));
+			tokens.push_back(Token(symbol::MINUSSYM, "-", r, c - 1));
 			type = next();
 			break;
 		case state::TIMES:
-			table.insert(pair<string, Token>("*", Token(symbol::TIMESSYM, "*", r, c-1)));
-			tokens.push_back(Token(symbol::TIMESSYM, "*", r, c-1));
+			table.insert(pair<string, Token>("*", Token(symbol::TIMESSYM, "*", r, c - 1)));
+			tokens.push_back(Token(symbol::TIMESSYM, "*", r, c - 1));
 			type = next();
 			break;
 		case state::DIVISION:
-			table.insert(pair<string, Token>("/", Token(symbol::DIVISIONSYM, "/", r, c-1)));
-			tokens.push_back(Token(symbol::DIVISIONSYM, "/", r, c-1));
+			table.insert(pair<string, Token>("/", Token(symbol::DIVISIONSYM, "/", r, c - 1)));
+			tokens.push_back(Token(symbol::DIVISIONSYM, "/", r, c - 1));
 			type = next();
 			break;
 		case state::LPAREN:
-			table.insert(pair<string, Token>("(", Token(symbol::LPARENSYM, "(", r, c-1)));
-			tokens.push_back(Token(symbol::LPARENSYM, "(", r, c-1));
+			table.insert(pair<string, Token>("(", Token(symbol::LPARENSYM, "(", r, c - 1)));
+			tokens.push_back(Token(symbol::LPARENSYM, "(", r, c - 1));
 			type = next();
 			break;
 		case state::RPAREN:
-			table.insert(pair<string, Token>(")", Token(symbol::RPARENSYM, ")", r, c-1)));
-			tokens.push_back(Token(symbol::RPARENSYM, ")", r, c-1));
+			table.insert(pair<string, Token>(")", Token(symbol::RPARENSYM, ")", r, c - 1)));
+			tokens.push_back(Token(symbol::RPARENSYM, ")", r, c - 1));
 			type = next();
 			break;
 		case state::COMMA:
-			table.insert(pair<string, Token>(",", Token(symbol::COMMASYM, ",", r, c-1)));
-			tokens.push_back(Token(symbol::COMMASYM, ",", r, c-1));
+			table.insert(pair<string, Token>(",", Token(symbol::COMMASYM, ",", r, c - 1)));
+			tokens.push_back(Token(symbol::COMMASYM, ",", r, c - 1));
 			type = next();
 			break;
 		case state::SEMICOLON:
-			table.insert(pair<string, Token>(";", Token(symbol::SEMICOLONSYM, ";", r, c-1)));
-			tokens.push_back(Token(symbol::SEMICOLONSYM, ";", r, c-1));
+			table.insert(pair<string, Token>(";", Token(symbol::SEMICOLONSYM, ";", r, c - 1)));
+			tokens.push_back(Token(symbol::SEMICOLONSYM, ";", r, c - 1));
 			type = next();
 			break;
 		case state::PERIOD:
-			table.insert(pair<string, Token>(".", Token(symbol::PERIODSYM, ".", r, c-1)));
-			tokens.push_back(Token(symbol::PERIODSYM, ".", r, c-1));
+			table.insert(pair<string, Token>(".", Token(symbol::PERIODSYM, ".", r, c - 1)));
+			tokens.push_back(Token(symbol::PERIODSYM, ".", r, c - 1));
 			type = next();
 			break;
 		default:
+
 			break;
 		}
 	}

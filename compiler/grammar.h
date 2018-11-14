@@ -37,7 +37,7 @@ public:
 	void getOriginGrammar();
 	void getOriginList();
 	void printGrammarList();
-	void transportToList();
+	//void transportToList();
 	void eliminateLeftRecursive();
 	void leftFactoring();
 

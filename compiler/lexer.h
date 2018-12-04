@@ -30,10 +30,13 @@ private:
 	map<string, Token> table;
 	vector<Token>tokens;
 	int r, c, n;
+	int cur;
 public:
 	int next();
 	Lexer(string t);
 	void printTokens();
+	Token nextToken();
+	bool tokensEnd();
 };
 
 #endif

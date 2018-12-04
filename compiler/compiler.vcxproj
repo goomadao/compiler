@@ -23,7 +23,7 @@
     <ProjectGuid>{78C0B382-9051-4822-B45C-46B54A1AA171}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>compiler</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -151,6 +151,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AstNode.h" />
     <ClInclude Include="grammar.h" />
     <ClInclude Include="grammarDefinition.h" />
     <ClInclude Include="lexer.h" />
@@ -158,9 +159,9 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="position.h" />
     <ClInclude Include="token.h" />
-    <ClInclude Include="tree.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AstNode.cpp" />
     <ClCompile Include="compiler.cpp" />
     <ClCompile Include="grammar.cpp" />
     <ClCompile Include="grammarDefinition.cpp" />
@@ -180,7 +181,6 @@
     <ClCompile Include="token.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="tree.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

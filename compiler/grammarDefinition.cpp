@@ -2,7 +2,7 @@
 #include "grammarDefinition.h"
 
 
-string GrammarDefinition::GrammarSymTypes[89] =
+string GrammarDefinition::GrammarSymTypes[95] =
 {
 		"程序",
 		"分程序",
@@ -24,6 +24,7 @@ string GrammarDefinition::GrammarSymTypes[89] =
 		"当型循环语句",
 		"读语句",
 		"写语句",
+		"重复语句",
 		"语句表",
 		"读变量表",
 		"读变量",
@@ -52,6 +53,7 @@ string GrammarDefinition::GrammarSymTypes[89] =
 		"当型循环语句+",
 		"读语句+",
 		"写语句+",
+		"重复语句+",
 		"语句表+",
 		"读变量表+",
 		"读变量+",
@@ -76,13 +78,17 @@ string GrammarDefinition::GrammarSymTypes[89] =
 		":=",
 		"if",
 		"then",
+		"else",
 		"while",
 		"do",
 		"read",
 		"(",
 		")",
 		"write",
+		"repeat",
+		"until",
 		"odd",
+		"<>",
 		"<",
 		"<=",
 		">",
@@ -119,7 +125,7 @@ bool GrammarDefinition::operator==(const GrammarDefinition & g)
 
 bool GrammarDefinition::startWithNonterminal()
 {
-	if (rightpart.empty() || rightpart[0] > 55)
+	if (rightpart.empty() || rightpart[0] > 58)//>58的是终结符
 		return false;
 	return true;
 }
@@ -150,8 +156,8 @@ bool GrammarDefinition::isLeftPartEqual(GrammarDefinition g)
 GrammarDefinition GrammarDefinition::changeTheFirstNonterminalOfRightExpressionToItsProduction()
 {
 	vector<int> tmp(this->rightpart.begin() + 1, this->rightpart.end());
-	tmp.push_back(this->leftPart() + 28);
-	return GrammarDefinition(this->leftPart() + 28, tmp);
+	tmp.push_back(this->leftPart() + 29);//+29变成相应的PLUS
+	return GrammarDefinition(this->leftPart() + 29, tmp);
 }
 
 GrammarDefinition GrammarDefinition::changeTheFirstNonterminalOfRightExpressionToItsProduction(GrammarDefinition g)
@@ -166,20 +172,20 @@ GrammarDefinition GrammarDefinition::changeTheFirstNonterminalOfRightExpressionT
 GrammarDefinition GrammarDefinition::generateSymWhenEliminate(GrammarDefinition g)
 {
 	vector<int> tmp = g.rightpart;
-	tmp.push_back(this->leftpart + 28);
+	tmp.push_back(this->leftpart + 29);
 	return GrammarDefinition(this->leftpart,tmp);
 }
 
 GrammarDefinition GrammarDefinition::generateSymWhenEliminatePlus()
 {
 	vector<int> tmp(this->rightpart.begin() + 1, this->rightpart.end());
-	tmp.push_back(this->leftpart + 28);
-	return GrammarDefinition(this->leftpart + 28, tmp);
+	tmp.push_back(this->leftpart + 29);
+	return GrammarDefinition(this->leftpart + 29, tmp);
 }
 
 GrammarDefinition GrammarDefinition::generateSymWhenEliminatePlusEmpty()
 {
-	return GrammarDefinition(this->leftpart + 28, vector<int>{GrammarSym::EMPTY});
+	return GrammarDefinition(this->leftpart + 29, vector<int>{GrammarSymSpace::EMPTY});
 }
 
 ostream & operator<<(ostream & out, const GrammarDefinition & g)

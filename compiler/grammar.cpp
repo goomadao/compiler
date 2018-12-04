@@ -6,7 +6,7 @@
 #include "grammar.h"
 #include<algorithm>
 #include<iomanip>
-using namespace GrammarSym;
+using namespace GrammarSymSpace;
 Grammar::Grammar()
 {
 	getOriginGrammar();
@@ -124,26 +124,32 @@ void Grammar::getOriginList()
 	grammarList.push_back(list< vector<int> >{vector<int>{PROCEDURELIST}, vector<int>{PROCEDURELIST, PROCEDUREHEADER, PROCEDUREBODY}, vector<int>{EMPTY}});
 	grammarList.push_back(list< vector<int> >{vector<int>{PROCEDUREHEADER}, vector<int>{PROCEDURE, ID, SEMICOLON}});
 	grammarList.push_back(list< vector<int> >{vector<int>{PROCEDUREBODY}, vector<int>{SUBPROCEDURE, SEMICOLON}});
-	grammarList.push_back(list< vector<int> >{vector<int>{STATEMENT}, vector<int>{ASSIGHNSTATEMENT}, vector<int>{CALLSTATEMENT}, vector<int>{COMPOUNDSTATEMENT}, vector<int>{CONTIDITIONSTATEMENT}, vector<int>{LOOPSTATEMENT}, vector<int>{READSTATEMENT}, vector<int>{WRITESTATEMENT}, vector<int>{EMPTY}});
+	grammarList.push_back(list< vector<int> >{vector<int>{STATEMENT}, vector<int>{ASSIGHNSTATEMENT}, vector<int>{CALLSTATEMENT}, vector<int>{COMPOUNDSTATEMENT}, vector<int>{CONTIDITIONSTATEMENT}, vector<int>{LOOPSTATEMENT}, vector<int>{READSTATEMENT}, vector<int>{WRITESTATEMENT}, vector<int>{REPEATSTATEMENT }, vector<int>{EMPTY}});
 	grammarList.push_back(list< vector<int> >{vector<int>{ASSIGHNSTATEMENT}, vector<int>{ID, BECOMES, EXPRESSION}});
 	grammarList.push_back(list< vector<int> >{vector<int>{CALLSTATEMENT}, vector<int>{CALL, ID}});
 	grammarList.push_back(list< vector<int> >{vector<int>{COMPOUNDSTATEMENT}, vector<int>{BEGIN, STATEMENTTABLE, END}});
 	grammarList.push_back(list< vector<int> >{vector<int>{STATEMENTTABLE}, vector<int>{STATEMENTTABLE, SEMICOLON, STATEMENT}, vector<int>{STATEMENT}});
-	grammarList.push_back(list< vector<int> >{vector<int>{CONTIDITIONSTATEMENT}, vector<int>{IF, CONDITION, THEN, STATEMENT}});
+
+
+	grammarList.push_back(list< vector<int> >{vector<int>{CONTIDITIONSTATEMENT}, vector<int>{IF, CONDITION, THEN, STATEMENT, CONTIDITIONSTATEMENTPLUS}});
+	grammarList.push_back(list< vector<int> >{vector<int>{CONTIDITIONSTATEMENTPLUS}, vector<int>{EMPTY }, vector<int>{ELSE, STATEMENT}});
+
+
 	grammarList.push_back(list< vector<int> >{vector<int>{LOOPSTATEMENT}, vector<int>{WHILE, CONDITION, DO, STATEMENT}});
 	grammarList.push_back(list< vector<int> >{vector<int>{READSTATEMENT}, vector<int>{READ, LEFTPARENT, READVARTABLE, RIGHTPARENT}});
 	grammarList.push_back(list< vector<int> >{vector<int>{READVARTABLE}, vector<int>{READVARTABLE, COMMA, READVAR}, vector<int>{READVAR}});
 	grammarList.push_back(list< vector<int> >{vector<int>{READVAR}, vector<int>{ID}});
 	grammarList.push_back(list< vector<int> >{vector<int>{WRITESTATEMENT}, vector<int>{WRITE, LEFTPARENT, WRITEEXPRESSIONTABLE, RIGHTPARENT}});
 	grammarList.push_back(list< vector<int> >{vector<int>{WRITEEXPRESSIONTABLE}, vector<int>{WRITEEXPRESSIONTABLE, COMMA, EXPRESSION}, vector<int>{EXPRESSION}});
+	grammarList.push_back(list< vector<int> >{vector<int>{REPEATSTATEMENT}, vector<int>{REPEAT, STATEMENTTABLE, UNTIL, CONDITION }});
 	
 	
 	
 	//grammarList.push_back(list< vector<int> >{vector<int>{CONDITION}, vector<int>{ODD, EXPRESSION}, vector<int>{EXPRESSION, EQUAL, EXPRESSION}, vector<int>{EXPRESSION, LESSTHAN, EXPRESSION}, vector<int>{EXPRESSION, LESSEQUAL, EXPRESSION}, vector<int>{EXPRESSION, GREATERTHAN, EXPRESSION}, vector<int>{EXPRESSION, GREATEREQUAL, EXPRESSION}});
 	
 	//手动解决左公因式的问题
-	grammarList.push_back(list< vector<int> >{vector<int>{CONDITION}, vector<int>{ODD, EXPRESSION}, vector<int>{EXPRESSION, EXPRESSIONPLUSPLUS}});
-	grammarList.push_back(list< vector<int> >{vector<int>{EXPRESSIONPLUSPLUS}, vector<int>{EQUAL, EXPRESSION}, vector<int>{LESSTHAN, EXPRESSION}, vector<int>{LESSEQUAL, EXPRESSION}, vector<int>{GREATERTHAN, EXPRESSION}, vector<int>{GREATEREQUAL, EXPRESSION}});
+	grammarList.push_back(list< vector<int> >{vector<int>{CONDITION}, vector<int>{ODD, EXPRESSION}, vector<int>{EXPRESSION, CONDITIONPLUS}});
+	grammarList.push_back(list< vector<int> >{vector<int>{CONDITIONPLUS}, vector<int>{EQUAL, EXPRESSION}, vector<int>{NOTEQUAL, EXPRESSION }, vector<int>{LESSTHAN, EXPRESSION}, vector<int>{LESSEQUAL, EXPRESSION}, vector<int>{GREATERTHAN, EXPRESSION}, vector<int>{GREATEREQUAL, EXPRESSION}});
 	
 	
 	grammarList.push_back(list< vector<int> >{vector<int>{EXPRESSION}, vector<int>{PLUS, TERM}, vector<int>{MINUS, TERM}, vector<int>{TERM}, vector<int>{EXPRESSION, PLUS, TERM}, vector<int>{EXPRESSION, MINUS, TERM}});
@@ -313,16 +319,16 @@ void Grammar::eliminateLeftRecursive()
 			i4 = i1->begin();
 			for (++i4; i4 != i1->end(); ++i4)
 			{
-				i4->push_back(i1->front()[0] + 28);//在非递归产生式右端最后都加上新的非终结符，即Ai->γ变为Ai->γAi'
+				i4->push_back(i1->front()[0] + 29);//在非递归产生式右端最后都加上新的非终结符，即Ai->γ变为Ai->γAi'
 			}
 
 			for (int i = 0; i < tempVector.size(); ++i)
 			{
-				tempVector[i].push_back(i1->front()[0] + 28);//在左递归产生式中非递归部分的最后加上新的非终结符γ->γAi'
+				tempVector[i].push_back(i1->front()[0] + 29);//在左递归产生式中非递归部分的最后加上新的非终结符γ->γAi'
 			}
 
 			list< vector<int> >newGrammar;
-			newGrammar.push_back(vector<int>{i1->front()[0] + 28});
+			newGrammar.push_back(vector<int>{i1->front()[0] + 29});
 			for (int i = 0; i < tempVector.size(); ++i)
 			{
 				newGrammar.push_back(tempVector[i]);
@@ -349,7 +355,7 @@ void Grammar::leftFactoring()
 
 void Grammar::getFirst()
 {
-	for (int i = 0; i < 88; ++i)
+	for (int i = 0; i <= ENDEOF; ++i)
 	{
 		calculateFirst(i);
 	}
@@ -361,7 +367,7 @@ void Grammar::calculateFirst(int x)
 	{
 		return;
 	}
-	if (x > 56)//终结符
+	if (x > EXPRESSIONPLUSPLUS)//>58的是终结符
 	{
 		first.insert(pair<int, set<int> >{x, { x }});//终结符的First集合就是它本身
 	}
@@ -430,7 +436,7 @@ void Grammar::getFollow()
 	follow.insert(pair<int, set<int> >{0, set<int>{ENDEOF}});
 	//follow.insert(pair<int, set<int> >{EXPRESSION, set<int>{ENDEOF}});
 	int oldSize = 0, newSize = 0x3f3f3f;
-	for (int i = 0; i < 88; ++i)
+	for (int i = 0; i < 95; ++i)
 	{
 		follow.insert(pair<int, set<int> >{i, set<int>{}});
 	}
@@ -468,7 +474,7 @@ void Grammar::calculateFollow()
 			{
 				for (i3 = i2->begin(); i3 != i2->end(); ++i3)
 				{
-					if (*i3 > 56)
+					if (*i3 > 58)//终结符
 					{
 						continue;
 					}
@@ -548,9 +554,9 @@ void Grammar::printFollow()
 
 void Grammar::getParsingTable()
 {
-	for (int i = 0; i < 57; ++i)
+	for (int i = 0; i < 59; ++i)
 	{
-		for (int j = 57; j < 89; ++j)
+		for (int j = 59; j < 95; ++j)
 		{
 			parsingTable.insert(pair<parsingNode, vector<int> >{parsingNode(i, j), vector<int>{}});
 		}
@@ -581,7 +587,8 @@ void Grammar::getParsingTable()
 						flag = true;
 						continue;
 					}
-					if (parsingTable.find(parsingNode(i1->front()[0], *i4))->second.size() != 0)//该节点已经对应了某一个产生式了
+
+					if (*i3>-20 && parsingTable.find(parsingNode(i1->front()[0], *i4))->second.size() != 0)//该节点已经对应了某一个产生式了
 					{
 						cout << "\nfirst中有二义性\n";
 						cout << GrammarDefinition::GrammarSymTypes[*i4] << "\n";

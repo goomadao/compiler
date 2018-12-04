@@ -11,7 +11,7 @@ using std::vector;
 using std::list;
 using std::set;
 using std::map;
-using namespace GrammarSym;
+using namespace GrammarSymSpace;
 
 struct parsingNode
 {
@@ -54,7 +54,7 @@ public:
 	void getParsingTable();
 	void printParsingTable();
 
-
+	map<parsingNode, vector<int> >parsingTable;
 private:
 	vector<GrammarDefinition> grammarSet;
 
@@ -68,7 +68,7 @@ private:
 	list< list< vector<int> > > grammarList;
 	map<int, set<int> >first;
 	map<int, set<int> >follow;
-	map<parsingNode, vector<int> >parsingTable;
+	
 };
 
 

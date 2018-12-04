@@ -140,6 +140,7 @@ Lexer::Lexer(string t)
 	r = 1;
 	c = 1;
 	n = 0;
+	cur = 0;
 	int type = next();
 	int leng = text.length();
 	int rr, rc, rn;
@@ -408,4 +409,15 @@ void Lexer::printTokens()
 		tokens[i].printPos();
 		cout << "\n";
 	}
+}
+
+Token Lexer::nextToken()
+{
+	if (cur != tokens.size())
+		return tokens[cur++];
+}
+
+bool Lexer::tokensEnd()
+{
+	return tokens.size() == cur;
 }

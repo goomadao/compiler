@@ -1,11 +1,14 @@
 #pragma once
 #ifndef _PARSER_H_
 #define _PARSER_H_
-#include"tree.h"
+#include"AstNode.h"
 #include"lexer.h"
 #include"grammar.h"
 #include<string>
+#include<stack>
 using std::string;
+using std::stack;
+using namespace GrammarSymSpace;
 
 class Parser
 {
@@ -13,11 +16,17 @@ public:
 	Parser(string t);
 
 	void printTokens();
+	int lexerTypeToGrammarType(Token g);
+	bool isTerminal(int s);
+	void printParsing();
 
 private:
-	Tree syntaxTree;
+	AstNode syntaxTree;
 	Lexer lexer;
 	Grammar grammar;
+	stack<int>parsing;
+	Token currentToekn;
+
 };
 
 

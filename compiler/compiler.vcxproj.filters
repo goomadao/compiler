@@ -36,7 +36,7 @@
     <ClInclude Include="parser.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="tree.h">
+    <ClInclude Include="AstNode.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -65,7 +65,7 @@
     <ClCompile Include="parser.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="tree.cpp">
+    <ClCompile Include="AstNode.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

@@ -8,7 +8,7 @@
 #include"pch.h"
 using namespace std;
 
-namespace GrammarSym
+namespace GrammarSymSpace
 {
 	enum GrammarSym
 	{
@@ -32,6 +32,7 @@ namespace GrammarSym
 		LOOPSTATEMENT,
 		READSTATEMENT,
 		WRITESTATEMENT,
+		REPEATSTATEMENT,
 		STATEMENTTABLE,
 		READVARTABLE,
 		READVAR,
@@ -60,6 +61,7 @@ namespace GrammarSym
 		LOOPSTATEMENTPLUS,
 		READSTATEMENTPLUS,
 		WRITESTATEMENTPLUS,
+		REPEATSTATEMENTPLUS,
 		STATEMENTTABLEPLUS,
 		READVARTABLEPLUS,
 		READVARPLUS,
@@ -84,13 +86,17 @@ namespace GrammarSym
 		BECOMES,
 		IF,
 		THEN,
+		ELSE,
 		WHILE,
 		DO,
 		READ,
 		LEFTPARENT,
 		RIGHTPARENT,
 		WRITE,
+		REPEAT,
+		UNTIL,
 		ODD,
+		NOTEQUAL,
 		LESSTHAN,
 		LESSEQUAL,
 		GREATERTHAN,
@@ -112,7 +118,7 @@ private:
 	vector<int> rightpart;
 	//static string GrammarSymTypes[87];
 public:
-	static string GrammarSymTypes[89];
+	static string GrammarSymTypes[95];
 	//GrammarDefinition();
 	//GrammarDefinition(int left);
 	GrammarDefinition(int left, vector<int>right);

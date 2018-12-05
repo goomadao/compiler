@@ -1,0 +1,11 @@
+const a = 5, b = 4, c = 3;
+var e, d, k, i, j;
+procedure get;
+    const a = 4;
+    var b, sa, h;
+    write(e);
+begin
+    read(i);
+    k := 6 * i + 6 * i;
+    write(k)
+end.

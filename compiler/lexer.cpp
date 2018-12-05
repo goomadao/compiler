@@ -212,7 +212,7 @@ Lexer::Lexer(string t)
 					table.insert(pair<string, Token>(text.substr(rn, n - rn + 1), Token(VARSYM, text.substr(rn, n - rn + 1), rr, rc)));
 					tokens.push_back(Token(VARSYM, text.substr(rn, n - rn + 1), rr, rc));
 				}
-				else if (revalue == "procedur")
+				else if (revalue == "procedure")
 				{
 					table.insert(pair<string, Token>(text.substr(rn, n - rn + 1), Token(PROCSYM, text.substr(rn, n - rn + 1), rr, rc)));
 					tokens.push_back(Token(PROCSYM, text.substr(rn, n - rn + 1), rr, rc));
@@ -311,6 +311,12 @@ Lexer::Lexer(string t)
 			{
 				table.insert(pair<string, Token>("<=", Token(LESYM, "<=", r, c - 2)));
 				tokens.push_back(Token(LESYM, "<=", r, c - 2));
+				type = next();
+			}
+			else if (type == state::GT)
+			{
+				table.insert(pair<string, Token>("<>", Token(NEQLSYM, "<>", r, c - 2)));
+				tokens.push_back(Token(NEQLSYM, "<>", r, c - 2));
 				type = next();
 			}
 			else

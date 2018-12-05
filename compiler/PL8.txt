@@ -1,0 +1,8 @@
+var i,j,k;
+procedure test;
+    k := i + j;
+begin
+    call test;
+    k := i + j
+
+end.

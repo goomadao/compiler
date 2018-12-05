@@ -1,0 +1,11 @@
+var i, j, k, t, q;
+begin
+    k := i + j;
+    if k <> 6 then
+        t := i + j
+    else
+        q := i + j;
+    write(k);
+    write(t);
+    write(q)
+end.

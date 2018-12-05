@@ -1,0 +1,9 @@
+var i, e;
+procedure get;
+    begin
+        read(e);
+        e := 1;
+        write(e)
+    end;
+
+write(e).

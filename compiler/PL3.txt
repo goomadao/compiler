@@ -1,0 +1,20 @@
+var e, d, k, i, j;
+procedure get;
+    read(i);
+begin
+    call get;
+    k := 0;
+    while i < 10
+    do
+        begin
+            j := 0 ;
+            while j < 10
+            do
+                begin
+                    k := k + 1;
+                    write(k);
+                    j := j + 1
+                end;
+            i := i + 1
+        end
+end.

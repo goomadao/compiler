@@ -24,3 +24,8 @@ void Token::printPos()
 {
 	pos.printPos();
 }
+
+Position Token::getPos()
+{
+	return pos;
+}

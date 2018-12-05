@@ -19,13 +19,16 @@ public:
 	int lexerTypeToGrammarType(Token g);
 	bool isTerminal(int s);
 	void printParsing();
+	void printSyntaxTree(AstNode * node);
 
 private:
-	AstNode syntaxTree;
+	AstNode* syntaxTree;
+	AstNode* currentNode;
 	Lexer lexer;
 	Grammar grammar;
 	stack<int>parsing;
 	Token currentToekn;
+
 
 };
 

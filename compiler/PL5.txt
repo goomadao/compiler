@@ -1,0 +1,7 @@
+const a = 6;
+var k;
+begin
+    k := a + 6;
+    k := k + 4;
+    write(k)
+end.

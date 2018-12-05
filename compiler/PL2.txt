@@ -1,0 +1,21 @@
+var e, d, k, i, j;
+procedure get;
+    read(i);
+begin
+    call get;
+    if i<>6 then
+        write(i)
+    else
+        begin
+            i := i + 1;
+            write(i)
+        end
+;
+    while i < 10
+    do
+        begin
+            k := 6 * i;
+            i := i + i;
+            write(i)
+        end
+end.

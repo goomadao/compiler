@@ -16,6 +16,7 @@ public:
 	int getType();
 	string getVal();
 	void printPos();
+	Position getPos();
 };
 
 

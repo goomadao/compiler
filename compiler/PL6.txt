@@ -1,0 +1,11 @@
+const a = 6;
+var k, e;
+begin
+    read(k);
+    while k < 10
+    do
+        begin
+            e := a + 1;
+            k := k + 1
+        end
+end.

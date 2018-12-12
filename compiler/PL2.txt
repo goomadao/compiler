@@ -1,4 +1,4 @@
-var e, d, k, i, j;
+var e,d,i,j,k;
 procedure get;
     read(i);
 begin
@@ -11,7 +11,7 @@ begin
             write(i)
         end
 ;
-    while i < 10
+    while i > 10
     do
         begin
             k := 6 * i;

@@ -55,6 +55,7 @@ public:
 	void printParsingTable();
 
 	map<parsingNode, vector<int> >parsingTable;
+	map<int, set<int> >follow;
 private:
 	vector<GrammarDefinition> grammarSet;
 
@@ -67,7 +68,7 @@ private:
 	*/
 	list< list< vector<int> > > grammarList;
 	map<int, set<int> >first;
-	map<int, set<int> >follow;
+	
 	
 };
 

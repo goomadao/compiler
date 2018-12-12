@@ -434,6 +434,10 @@ void Grammar::printFirst()
 void Grammar::getFollow()
 {
 	follow.insert(pair<int, set<int> >{0, set<int>{ENDEOF}});
+	/*for (int i = GrammarSymSpace::CONST; i < GrammarSymSpace::ENDEOF + 1; ++i)
+	{
+		follow.insert(pair<int, set<int> >{i, set<int>{i }});
+	}*/
 	//follow.insert(pair<int, set<int> >{EXPRESSION, set<int>{ENDEOF}});
 	int oldSize = 0, newSize = 0x3f3f3f;
 	for (int i = 0; i < 95; ++i)

@@ -154,8 +154,9 @@ Lexer::Lexer(string t)
 		case NUL:
 			rr = r; rc = c - 1; rn = n - 1;
 			type = next();
-			table.insert(pair<string, Token>(text.substr(rn, n - rn - 1), Token(ERROR, text.substr(rn, n - rn - 1), rr, rc)));
-			tokens.push_back(Token(ERROR, text.substr(rn, n - rn - 1), rr, rc));
+			/*table.insert(pair<string, Token>(text.substr(rn, n - rn - 1), Token(ERROR, text.substr(rn, n - rn - 1), rr, rc)));
+			tokens.push_back(Token(ERROR, text.substr(rn, n - rn - 1), rr, rc));*/
+			errorTokens.push_back(Token(ERROR, text.substr(rn, n - rn - 1), rr, rc));
 			break;
 		case BLANK:
 			type = next();
@@ -301,8 +302,9 @@ Lexer::Lexer(string t)
 			}
 			else
 			{
-				table.insert(pair<string, Token>(":", Token(ERROR, ":", r, c - 2)));
-				tokens.push_back(Token(ERROR, ":", r, c - 2));
+				/*table.insert(pair<string, Token>(":", Token(ERROR, ":", r, c - 2)));
+				tokens.push_back(Token(ERROR, ":", r, c - 2));*/
+				errorTokens.push_back(Token(ERROR, ":", r, c - 2));
 			}
 			break;
 		case LS:

@@ -39,6 +39,12 @@
     <ClInclude Include="AstNode.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="ErrorMessage.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="symbolTable.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -66,6 +72,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="AstNode.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ErrorMessage.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="symbolTable.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

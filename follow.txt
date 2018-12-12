@@ -1,0 +1,95 @@
+程序            	:$,
+分程序         	:.,
+说明部分        	:id, call, begin, ., if, while, read, write, repeat,
+常量说明部分    	:id, var, procedure, call, begin, ., if, while, read, write, repeat,
+常量定义表      	:;,
+常量定义        	:;, ,,
+变量说明部分    	:id, procedure, call, begin, ., ;, if, while, read, write, repeat,
+变量表          	:;,
+变量            	:;, ,,
+过程说明列表    	:id, call, begin, ., ;, if, while, read, write, repeat,
+过程首部        	:const, id, var, procedure, call, begin, ;, if, while, read, write, repeat,
+过程体          	:id, procedure, call, begin, ., ;, if, while, read, write, repeat,
+语句            	:end, ., ;, else, until,
+赋值语句        	:end, ., ;, else, until,
+过程调用语句    	:end, ., ;, else, until,
+复合语句        	:end, ., ;, else, until,
+条件语句        	:end, ., ;, else, until,
+当型循环语句    	:end, ., ;, else, until,
+读语句          	:end, ., ;, else, until,
+写语句          	:end, ., ;, else, until,
+重复语句        	:end, ., ;, else, until,
+语句表          	:end, until,
+读变量表        	:),
+读变量          	:,, ),
+写表达式表      	:),
+条件            	:end, ., ;, then, else, do, until,
+表达式          	:end, =, ., ;, ,, then, else, do, ), until, <>, <, <=, >, >=,
+项              	:end, =, ., ;, ,, then, else, do, ), until, <>, <, <=, >, >=, +, -,
+因子            	:end, =, ., ;, ,, then, else, do, ), until, <>, <, <=, >, >=, +, -, *, /,
+程序+           	:
+分程序+         	:
+说明部分+       	:
+常量说明部分+   	:
+常量定义表+     	:;,
+常量定义+       	:
+变量说明部分+   	:
+变量表+         	:;,
+变量+           	:
+过程说明列表+   	:id, call, begin, ., ;, if, while, read, write, repeat,
+过程首部+       	:
+过程体+         	:
+语句+           	:
+赋值语句+       	:
+过程调用语句+   	:
+复合语句+       	:
+条件语句+       	:end, ., ;, else, until,
+当型循环语句+   	:
+读语句+         	:
+写语句+         	:
+重复语句+       	:
+语句表+         	:end, until,
+读变量表+       	:),
+读变量+         	:
+写表达式表+     	:),
+条件+           	:end, ., ;, then, else, do, until,
+表达式+         	:end, =, ., ;, ,, then, else, do, ), until, <>, <, <=, >, >=,
+项+             	:end, =, ., ;, ,, then, else, do, ), until, <>, <, <=, >, >=, +, -,
+因子+           	:
+表达式++        	:
+const           	:
+id              	:
+integer         	:
+var             	:
+procedure       	:
+call            	:
+begin           	:
+end             	:
+=               	:
+.               		:
+;               		:
+,               		:
+:=            	  	:
+if              		:
+then            	:
+else            	:
+while           	:
+do              	:
+read            	:
+(               		:
+)               		:
+write           	:
+repeat          	:
+until           	:
+odd             	:
+<>              	:
+<               	:
+<=              	:
+>               	:
+>=              	:
++               	:
+-               		:
+*               		:
+/               		:
+ε              		:
+$               	:

@@ -152,17 +152,20 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AstNode.h" />
+    <ClInclude Include="ErrorMessage.h" />
     <ClInclude Include="grammar.h" />
     <ClInclude Include="grammarDefinition.h" />
     <ClInclude Include="lexer.h" />
     <ClInclude Include="parser.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="position.h" />
+    <ClInclude Include="symbolTable.h" />
     <ClInclude Include="token.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AstNode.cpp" />
     <ClCompile Include="compiler.cpp" />
+    <ClCompile Include="ErrorMessage.cpp" />
     <ClCompile Include="grammar.cpp" />
     <ClCompile Include="grammarDefinition.cpp" />
     <ClCompile Include="lexer.cpp">
@@ -178,6 +181,7 @@
     <ClCompile Include="position.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="symbolTable.cpp" />
     <ClCompile Include="token.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>

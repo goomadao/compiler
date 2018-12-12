@@ -32,6 +32,7 @@ private:
 	int r, c, n;
 	int cur;
 public:
+	vector<Token>errorTokens;
 	int next();
 	Lexer(string t);
 	void printTokens();

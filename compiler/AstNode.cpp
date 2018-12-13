@@ -43,3 +43,8 @@ int AstNode::getType()
 	return type;
 }
 
+Position AstNode::getPos()
+{
+	return pos;
+}
+

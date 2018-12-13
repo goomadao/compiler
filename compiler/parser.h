@@ -31,16 +31,17 @@ public:
 
 	void semanticAnalysis();
 	void checkSymbolTable();
+	int getUseType(AstNode* node);
 
 private:
 	AstNode* syntaxTree;
-	AstNode* currentNode;
+	//AstNode* currentNode;
 	Lexer lexer;
 	Grammar grammar;
 	stack<int>parsing;//LL1语法分析栈
 	Token currentToekn;//当前分析到的token，即输入中剩余代码中的第一个token
 	priority_queue<errorMessage, vector<errorMessage>, greater<errorMessage> >errorList;
-	symbolTable symTable;
+	symbolTable* symTable;
 
 
 };

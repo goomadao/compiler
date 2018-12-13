@@ -18,7 +18,8 @@ Parser::Parser(string t):lexer(t),currentToekn(lexer.nextToken())
 	}
 	parsing.push(PROCEDURES);
 	syntaxTree = new AstNode(PROCEDURES, 0, currentToekn.getPos());
-	currentNode = syntaxTree;
+	symTable = new symbolTable();
+	AstNode* currentNode = syntaxTree;
 	while (!parsing.empty())
 	{
 		cout << "currentNode:" << GrammarDefinition::GrammarSymTypes[currentNode->getType()] << "   currentToken:" << currentToekn.getVal() << "\n";
@@ -79,16 +80,44 @@ Parser::Parser(string t):lexer(t),currentToekn(lexer.nextToken())
 			{
 				cout << GrammarDefinition::GrammarSymTypes[parsing.top()] << "和" << currentToekn.getVal() << "不匹配!\n";
 				
-				//先找出从这个节点向上递归所有父节点的所有follow集，一直找到根节点
-				//先判断当前指向的token，再取下一个token，直到这个token和之前找到的follow集中的某个终结符匹配
-				//currentNode开始向父节点递归，直到这个节点的follow集中包含这个token
+
+
+
+
 				errorAdd(currentToekn.getPos(), "Expect \"" + GrammarDefinition::GrammarSymTypes[parsing.top()] + "\", while found \"" + currentToekn.getVal() + "\"");
+
+				//首先查看自己后面的兄弟节点是否存在分号和end，
+				//如果存在，就直接停止寻找follow集
+				//如果不存在，就开始向父节点递归，先记录这个节点的follow集，然后也查看这个节点后面的兄弟节点是否存在分号、end或者标志程序结束的小数点，一直往上递归，直到兄弟节点中找到了分号、end或者标志程序结束的小数点就停止递归。
+				//然后开始扫描token，
+				//如果这个token在之前的记录里面，那么说明应该重新从这个token开始分析，
+				//如果不在，则继续扫描下一个token，直到扫描到end、分号或者标志程序结束的小数点，强行中断扫描，并且从这里重新开始分析
+				//然后根据这个token确定应该把分析栈中哪些部分出栈（这些部分被跳过），然后重新开始语法分析
 
 				bool flag = 0, terminalMatch = 0;
 				set<int>follows;
 				AstNode* tmp = currentNode;
-				while (tmp != syntaxTree)//一直递归到根节点找到所有的follow中的终结符
+				while (tmp != syntaxTree)//一直往上递归找follow集，直到遇到; end或者.
 				{
+					cout << "currentNode:  " << GrammarDefinition::GrammarSymTypes[tmp->getType()] << "\n";
+					bool flag = 0;
+					for (int i = tmp->getWz() + 1; i < tmp->getFather()->child.size(); ++i)
+					{
+						if (tmp->getFather()->child[i]->getType() == GrammarSymSpace::SEMICOLON ||
+							tmp->getFather()->child[i]->getType() == GrammarSymSpace::END ||
+							tmp->getFather()->child[i]->getType() == GrammarSymSpace::PERIOD)
+						{
+							flag = 1;
+							break;
+						}
+					}
+					if (flag)
+						break;
+
+
+
+
+
 					tmp = tmp->getFather();
 					set<int>::iterator it;
 					for (it = grammar.follow.find(tmp->getType())->second.begin(); it != grammar.follow.find(tmp->getType())->second.end(); ++it)
@@ -99,6 +128,10 @@ Parser::Parser(string t):lexer(t),currentToekn(lexer.nextToken())
 				while (1)
 				{
 					
+
+
+
+
 					if (follows.find(lexerTypeToGrammarType(currentToekn)) != follows.end())//当前指向的token在follows中
 					{
 						if (currentNode->getType() == lexerTypeToGrammarType(currentToekn))
@@ -127,6 +160,43 @@ Parser::Parser(string t):lexer(t),currentToekn(lexer.nextToken())
 						if (flag)
 							break;
 					}
+
+					//如果遇到了; end或者.，就应该从这里重新开始语法分析了，其他的都要跳过
+					if (lexerTypeToGrammarType(currentToekn) == GrammarSymSpace::SEMICOLON ||
+						lexerTypeToGrammarType(currentToekn) == GrammarSymSpace::END ||
+						lexerTypeToGrammarType(currentToekn) == GrammarSymSpace::PERIOD)
+					{
+						while (parsing.top() != GrammarSymSpace::SEMICOLON &&
+							parsing.top() != GrammarSymSpace::END &&
+							parsing.top() != GrammarSymSpace::PERIOD)//把栈顶到; end或者.之间的符号全部出栈（被跳过）
+						{
+							parsing.pop();
+						}
+						bool flag = 0;
+						while (1)
+						{
+							for (int i = currentNode->getWz() + 1; i < currentNode->getFather()->child.size(); ++i)
+							{
+								if (currentNode->getFather()->child[i]->getType() == GrammarSymSpace::SEMICOLON ||
+									currentNode->getFather()->child[i]->getType() == GrammarSymSpace::END ||
+									currentNode->getFather()->child[i]->getType() == GrammarSymSpace::PERIOD)
+								{
+									flag = 1;
+									currentNode = currentNode->getFather()->child[i];
+									break;
+								}
+							}
+							if (flag)
+								break;
+							currentNode = currentNode->getFather();
+						}
+						terminalMatch = 1;
+						break;
+					}
+
+
+
+
 					if (lexer.tokensEnd())
 					{
 						cout << "代码已空，语法分析失败\n";
@@ -189,8 +259,26 @@ Parser::Parser(string t):lexer(t),currentToekn(lexer.nextToken())
 				//{
 				//	follows.insert(*it);
 				//}
-				while (tmp != syntaxTree)//一直递归到根节点找到所有的follow中的终结符
+				while (1)//一直递归到根节点找到所有的follow中的终结符
 				{
+					cout << "currentNode:  " << GrammarDefinition::GrammarSymTypes[tmp->getType()] << "\n";
+					bool flag = 0;
+					for (int i = tmp->getWz() + 1; i < tmp->getFather()->child.size(); ++i)
+					{
+						if (tmp->getFather()->child[i]->getType() == GrammarSymSpace::SEMICOLON ||
+							tmp->getFather()->child[i]->getType() == GrammarSymSpace::END ||
+							tmp->getFather()->child[i]->getType() == GrammarSymSpace::PERIOD)
+						{
+							flag = 1;
+							break;
+						}
+					}
+					if (flag)
+						break;
+
+
+
+
 					tmp = tmp->getFather();
 					set<int>::iterator it;
 					for (it = grammar.follow.find(tmp->getType())->second.begin(); it != grammar.follow.find(tmp->getType())->second.end(); ++it)
@@ -200,6 +288,9 @@ Parser::Parser(string t):lexer(t),currentToekn(lexer.nextToken())
 				}
 				while (1)
 				{
+					
+
+
 
 					if (follows.find(lexerTypeToGrammarType(currentToekn)) != follows.end())//当前指向的token在follows中
 					{
@@ -210,12 +301,12 @@ Parser::Parser(string t):lexer(t),currentToekn(lexer.nextToken())
 							break;
 						}
 						parsing.pop();
-						if (grammar.follow.find(currentNode->getType())->second.find(lexerTypeToGrammarType(currentToekn)) != grammar.follow.find(currentNode->getType())->second.end())
-						{
-							//这个非终结符的follow集中有当前指向的token，找到了可以继续进行分析的Node
-							flag = 1;
-							break;
-						}
+						//if (grammar.follow.find(currentNode->getType())->second.find(lexerTypeToGrammarType(currentToekn)) != grammar.follow.find(currentNode->getType())->second.end())
+						//{
+						//	//这个非终结符的follow集中有当前指向的token，找到了可以继续进行分析的Node
+						//	flag = 1;
+						//	break;
+						//}
 						while (currentNode != syntaxTree)
 						{
 							for (int i = currentNode->getWz(); i < currentNode->getFather()->child.size() - 1; ++i)
@@ -234,6 +325,43 @@ Parser::Parser(string t):lexer(t),currentToekn(lexer.nextToken())
 						if (flag)
 							break;
 					}
+
+
+
+					if (lexerTypeToGrammarType(currentToekn) == GrammarSymSpace::SEMICOLON ||
+						lexerTypeToGrammarType(currentToekn) == GrammarSymSpace::END ||
+						lexerTypeToGrammarType(currentToekn) == GrammarSymSpace::PERIOD)
+					{
+						while (parsing.top() != GrammarSymSpace::SEMICOLON &&
+							parsing.top() != GrammarSymSpace::END &&
+							parsing.top() != GrammarSymSpace::PERIOD)
+						{
+							parsing.pop();
+						}
+						bool flag = 0;
+						while (1)
+						{
+							for (int i = currentNode->getWz() + 1; i < currentNode->getFather()->child.size(); ++i)
+							{
+								if (currentNode->getFather()->child[i]->getType() == GrammarSymSpace::SEMICOLON ||
+									currentNode->getFather()->child[i]->getType() == GrammarSymSpace::END ||
+									currentNode->getFather()->child[i]->getType() == GrammarSymSpace::PERIOD)
+								{
+									flag = 1;
+									currentNode = currentNode->getFather()->child[i];
+									break;
+								}
+							}
+							if (flag)
+								break;
+							currentNode = currentNode->getFather();
+						}
+						terminalMatch = 1;
+						break;
+					}
+
+
+
 					if (lexer.tokensEnd())
 					{
 						cout << "代码已空，语法分析失败\n";
@@ -332,7 +460,13 @@ Parser::Parser(string t):lexer(t),currentToekn(lexer.nextToken())
 		printParsing();
 		cout << "\n";
 	}
+	AstNode* baocun = syntaxTree;
 	printSyntaxTree(syntaxTree);//输出语法树的叶节点（可能会输出ε）
+	syntaxTree = baocun;
+
+
+
+	semanticAnalysis();//语义分析
 }
 
 void Parser::printTokens()
@@ -483,10 +617,190 @@ void Parser::printErrorList()
 
 void Parser::semanticAnalysis()
 {
-	semanticAnalysis();
+	checkSymbolTable();
 }
 
 void Parser::checkSymbolTable()
 {
+	AstNode* currentNode = syntaxTree;
+	symbolTable* currentTable = symTable;
+	while (1)
+	{
+		/*int js = 0;
+		symbolTable* tst = currentTable;
+		while (tst != nullptr)
+		{
+			++js;
+			tst = tst->getPre();
+		}
+		cout << "currentNode: " << GrammarDefinition::GrammarSymTypes[currentNode->getType()] << "  Level:" << js << "\n";*/
+
+
+
+
+		if (currentNode->getType() == GrammarSymSpace::PROCEDURELIST)
+		{
+			currentTable = new symbolTable(currentTable);
+		}
+		if (currentNode->getType() == GrammarSymSpace::ID)//如果当前节点是ID，向上递归查找是声明还是使用
+		{
+			int flag = getUseType(currentNode);
+			if (flag == -4)
+			{
+				if (!currentTable->findVar(currentNode->getInfo()) && !currentTable->findConst(currentNode->getInfo()))
+				{
+					errorAdd(currentNode->getPos(), "Undefined identifier \""+currentNode->getInfo()+"\"");
+				}
+				/*else
+				{
+					currentTable->printTable();
+				}*/
+			}
+			else if (flag == -3)
+			{
+				if (!currentTable->findProcedure(currentNode->getInfo()))
+				{
+					errorAdd(currentNode->getPos(), "Undefined procedure \"" + currentNode->getInfo() + "\"");
+				}
+				/*else
+				{
+					currentTable->printTable();
+				}*/
+			}
+			else if (flag == -2)
+			{
+				if (!currentTable->findVar(currentNode->getInfo()))
+				{
+					errorAdd(currentNode->getPos(), "Undefined identifier \"" + currentNode->getInfo() + "\"");
+				}
+				/*else
+				{
+					currentTable->printTable();
+				}*/
+			}
+			else if (flag == -1)
+			{
+				if (!currentTable->findConst(currentNode->getInfo()))
+				{
+					errorAdd(currentNode->getPos(), "Undefined identifier \"" + currentNode->getInfo() + "\"");
+				}
+			}
+			else if (flag == 1)
+			{
+				if (!currentTable->findWithNoRecursive(currentNode->getInfo()))
+				{
+					currentTable->addConst(currentNode->getInfo());
+					//cout << "const声明成功\n";
+				}
+				else
+				{
+					errorAdd(currentNode->getPos(), "\""+currentNode->getInfo()+"\" has been defined, redefinition is not allowed.");
+				}
+			}
+			else if (flag == 2)
+			{
+				if (!currentTable->findWithNoRecursive(currentNode->getInfo()))
+				{
+					currentTable->addVar(currentNode->getInfo());
+					//cout << "var声明成功\n";
+				}
+				else
+				{
+					errorAdd(currentNode->getPos(), "\"" + currentNode->getInfo() + "\" has been defined, redefinition is not allowed.");
+				}
+			}
+			else if (flag == 3)
+			{
+				if (!currentTable->getPre()->findWithNoRecursive(currentNode->getInfo()))
+				{
+					currentTable->getPre()->addProcedure(currentNode->getInfo());
+					//cout << "procedure声明成功\n";
+				}
+				else
+				{
+					errorAdd(currentNode->getPos(), "\"" + currentNode->getInfo() + "\" has been defined, redefinition is not allowed.");
+				}
+			}
+			else
+			{
+				errorAdd(currentNode->getPos(), "Unknown error.");
+			}
+		}
+
+
+
+
+		//移向下一个节点
+		if (!currentNode->child.empty())
+		{
+			currentNode = currentNode->child[0];
+		}
+		else
+		{
+			while (currentNode->getWz() == currentNode->getFather()->child.size() - 1)
+			{
+				currentNode = currentNode->getFather();
+				if (currentNode->getType() == GrammarSymSpace::PROCEDURELIST)
+					currentTable = currentTable->getPre();
+				if (currentNode == syntaxTree)
+				{
+					return;
+				}
+			}
+			currentNode = currentNode->getFather()->child[currentNode->getWz() + 1];
+		}
+	}
+
+}
+
+
+/*
+-4——到var或者const里面去查找
+-3——到procedure查找
+-2——到var查找
+-1——到const查找
+ 0——错误
+ 1——声明const
+ 2——声明var
+ 3——声明procedure
+*/
+int Parser::getUseType(AstNode * node)
+{
+	if (node->getType() == GrammarSymSpace::CONSTDEFINITION)//声明const
+	{
+		return 1;
+	}
+	if (node->getType() == GrammarSymSpace::VARDEFINITION)//声明var
+	{
+		return 2;
+	}
+	if (node->getType() == GrammarSymSpace::PROCEDUREHEADER)//声明procedure
+	{
+		return 3;
+	}
+	if (node->getType() == GrammarSymSpace::ASSIGHNSTATEMENT ||
+		node->getType() == GrammarSymSpace::READVAR)//赋值语句和读变量，使用var
+	{
+		return -2;
+	}
+	if (node->getType() == GrammarSymSpace::CALLSTATEMENT)//调用语句，使用procedure
+	{
+		return -3;
+	}
+	if (node->getType() == GrammarSymSpace::STATEMENTTABLE)
+	{
+		if (node->child[0]->getType() == GrammarSymSpace::ID)//赋值语句，使用var
+			return -2;
+		if (node->child[1]->getType() == GrammarSymSpace::ID)//调用语句，使用procedure
+			return -3;
+		return 0;//错误
+	}
+	if (node->getType() == GrammarSymSpace::FACTOR)
+	{
+		return -4;//可以是const也可以是var
+	}
+	if (node == syntaxTree)//找到根节点
+		return 0;
+	return getUseType(node->getFather());//继续递归向父节点查找
 }
 

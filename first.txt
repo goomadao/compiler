@@ -1,4 +1,4 @@
-程序		 :const, id, var, procedure, call, begin, ., if, while, read, write, repeat,
+程序		:const, id, var, procedure, call, begin, ., if, while, read, write, repeat,
 分程序		:const, id, var, procedure, call, begin, if, while, read, write, repeat, ε,
 说明部分		:const, var, procedure, ε,
 常量说明部分	:const, ε,

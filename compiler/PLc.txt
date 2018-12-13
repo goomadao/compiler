@@ -1,0 +1,28 @@
+const a=1,b=2;
+var c,d,e,i,k;
+procedure get;
+    const f=3,g=4;
+    var h,i;
+    procedure put;
+        const j=5,k=6;
+        var l,m; 
+        write(l);
+    read(i);
+begin
+    call get;
+    if i<>6 then
+        write(i)
+    else
+        begin
+            i := i + 1;
+            write(i)
+        end
+;
+    while i > 10
+    do
+        begin
+            k := 6 * i;
+            i := i + i;
+            write(i)
+        end
+end.

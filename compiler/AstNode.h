@@ -20,6 +20,7 @@ public:
 	AstNode* getFather();
 	string getInfo();
 	int getType();
+	Position getPos();
 
 
 

@@ -19,6 +19,7 @@ Parser::Parser(string t):lexer(t),currentToekn(lexer.nextToken())
 	parsing.push(PROCEDURES);
 	syntaxTree = new AstNode(PROCEDURES, 0, currentToekn.getPos());
 	symTable = new symbolTable();
+	runTable = new sTable();
 	AstNode* currentNode = syntaxTree;
 	while (!parsing.empty())
 	{
@@ -467,6 +468,16 @@ Parser::Parser(string t):lexer(t),currentToekn(lexer.nextToken())
 
 
 	semanticAnalysis();//语义分析
+
+
+
+	if (errorList.empty())
+	{
+		genPCode();
+		printPCode();
+	}
+
+
 }
 
 void Parser::printTokens()
@@ -690,6 +701,28 @@ void Parser::checkSymbolTable()
 				if (!currentTable->findWithNoRecursive(currentNode->getInfo()))
 				{
 					currentTable->addConst(currentNode->getInfo());
+					if (currentNode->getFather()->child.size() == 3)
+					{
+						bool flag = 1;
+						AstNode* tmpNode = currentNode->getFather()->child[2];
+						for (int i = 0; i < tmpNode->getInfo().size(); ++i)
+						{
+							if (!isdigit(tmpNode->getInfo()[i]))
+							{
+								flag = 0;
+								break;
+							}
+						}
+						if (flag)
+						{
+							currentTable->addCConst(currentNode->getInfo(), stoi(currentNode->getFather()->child[2]->getInfo()));
+							cout << "constSymbol:" << currentNode->getInfo() << "   Val:" << stoi(currentNode->getFather()->child[2]->getInfo()) << "\n";
+						}
+						else
+						{
+							currentTable->addCConst(currentNode->getInfo());
+						}
+					}
 					//cout << "const声明成功\n";
 				}
 				else
@@ -803,4 +836,519 @@ int Parser::getUseType(AstNode * node)
 		return 0;
 	return getUseType(node->getFather());//继续递归向父节点查找
 }
+
+void Parser::genPCode()
+{
+	AstNode* currentNode = syntaxTree;
+	sTable* currentTable = runTable;
+	pcode.push_back(pCode("JMP", 0, 0x3f3f3f));
+	while (1)
+	{
+		if (currentNode->getType() == GrammarSymSpace::PROCEDURELIST)
+		{
+			currentTable = new sTable(currentTable);
+		}
+
+
+
+
+		if (currentNode->getType() == GrammarSymSpace::ID)//如果当前节点是ID，向上递归查找是声明还是使用
+		{
+			int flag = getUseType(currentNode);
+			if (flag == 1)
+			{
+				currentTable->addConst(currentNode->getInfo(), stoi(currentNode->getFather()->child[2]->getInfo()));
+				//cout << "const声明成功\n";
+			}
+			else if (flag == 2)
+			{
+				currentTable->addVar(currentNode->getInfo());
+				//cout << "var声明成功\n";
+			}
+			else if (flag == 3)
+			{
+				currentTable->getPre()->addProcedure(currentNode->getInfo());
+				//cout << "procedure声明成功\n";
+			}
+			else
+			{
+				errorAdd(currentNode->getPos(), "Unknown error.");
+			}
+		}
+
+		else if (currentNode->getType() == GrammarSymSpace::STATEMENT)
+		{
+			handleStatement(currentNode, currentTable);
+			while (!currentNode->child.empty())
+			{
+				currentNode = currentNode->child[currentNode->child.size() - 1];
+			}
+		}
+
+		else if (currentNode->getType() == GrammarSymSpace::STATEMENTTABLE)
+		{
+			handleStatementTable(currentNode, currentTable);
+			while (!currentNode->child.empty())
+			{
+				currentNode = currentNode->child[currentNode->child.size() - 1];
+			}
+		}
+
+
+
+
+		//移向下一个节点
+		if (!currentNode->child.empty())
+		{
+			currentNode = currentNode->child[0];
+		}
+		else
+		{
+			while (currentNode->getWz() == currentNode->getFather()->child.size() - 1)
+			{
+				currentNode = currentNode->getFather();
+				if (currentNode->getType() == GrammarSymSpace::PROCEDURELIST)
+				{
+					currentTable = currentTable->getPre();
+					if (currentNode->getFather()->getType() == GrammarSymSpace::PROCEDUREBODY)
+					{
+						currentTable->getPre()->setProcedure(currentNode->getFather()->getFather()->child[0]->child[1]->getInfo(), pcode.size());//table和procedure id可能定位错误
+					}
+					else if (currentNode->getFather()->getType() == GrammarSymSpace::DEFINITIONPART)
+					{
+						startJump = pcode.size();
+						pcode[0].a2 = pcode.size();
+					}
+				}
+				if (currentNode->getType() == GrammarSymSpace::PROCEDUREBODY ||
+					currentNode->getType() == GrammarSymSpace::SUBPROCEDURE)
+				{
+					pcode.push_back(pCode("OPR", 0, 0));
+				}
+				if (currentNode == syntaxTree)
+				{
+					return;
+				}
+			}
+			currentNode = currentNode->getFather()->child[currentNode->getWz() + 1];
+		}
+	}
+}
+
+void Parser::handleExpression(AstNode * n, sTable * s)
+{
+	AstNode* currentNode = n;
+	sTable* currentTable = s;
+	if (currentNode->child[0]->getType() == GrammarSymSpace::TERM)
+	{
+		handleTerm(currentNode->child[0], currentTable);
+		handleExpressionPlus(currentNode->child[1], currentTable);
+	}
+	else if (currentNode->child[0]->getType() == GrammarSymSpace::PLUS)
+	{
+		handleTerm(currentNode->child[1], currentTable);
+		handleExpressionPlus(currentNode->child[2], currentTable);
+	}
+	else if (currentNode->child[0]->getType() == GrammarSymSpace::MINUS)
+	{
+		//ToDo:表达式开头为-时的做法
+		/*handleTerm(currentNode->child[1], currentTable);
+		handleExpressionPlus(currentNode->child[2], currentTable);*/
+	}
+}
+
+void Parser::handleExpressionPlus(AstNode * n, sTable * s)
+{
+	AstNode* currentNode = n;
+	sTable* currentTable = s;
+	if (currentNode->child[0]->getType() == GrammarSymSpace::PLUS)
+	{
+		handleTerm(currentNode->child[1], currentTable);
+		pcode.push_back(pCode("OPR", 0, 2));
+	}
+	else if (currentNode->child[0]->getType() == GrammarSymSpace::MINUS)
+	{
+		handleTerm(currentNode->child[1], currentTable);
+		pcode.push_back(pCode("OPR", 0, 3));
+	}
+	else
+	{
+		return;
+	}
+	handleExpressionPlus(currentNode->child[2], currentTable);
+}
+
+void Parser::handleTerm(AstNode * n, sTable * s)
+{
+	AstNode* currentNode = n;
+	sTable* currentTable = s;
+	handleFactor(currentNode->child[0], currentTable);
+	handleTermPlus(currentNode->child[1], currentTable);
+}
+
+void Parser::handleTermPlus(AstNode * n, sTable * s)
+{
+	AstNode* currentNode = n;
+	sTable* currentTable = s;
+	if (currentNode->child[0]->getType() == GrammarSymSpace::TIMES)
+	{
+		handleFactor(currentNode->child[1], currentTable);
+		pcode.push_back(pCode("OPR", 0, 4));
+	}
+	else if (currentNode->child[0]->getType() == GrammarSymSpace::DIVISION)
+	{
+		handleFactor(currentNode->child[1], currentTable);
+		pcode.push_back(pCode("OPR", 0, 5));
+	}
+	else
+	{
+		return;
+	}
+	handleTermPlus(currentNode->child[2], currentTable);
+}
+
+void Parser::handleFactor(AstNode * n, sTable * s)
+{
+	AstNode* currentNode = n;
+	sTable* currentTable = s;
+	if (currentNode->child[0]->getType() == GrammarSymSpace::LEFTPARENT)
+	{
+		handleExpression(currentNode->child[1], currentTable);
+	}
+	else if (currentNode->child[0]->getType() == GrammarSymSpace::INTEGER)
+	{
+		pcode.push_back(pCode("LIT", 0, stoi(currentNode->child[0]->getInfo())));
+	}
+	else if (currentNode->child[0]->getType() == GrammarSymSpace::ID)
+	{
+		if (currentTable->judgeVarOrConst(currentNode->child[0]->getInfo()))
+		{
+			pos tmp = currentTable->findVar(currentNode->child[0]->getInfo());
+			pcode.push_back(pCode("LOD", tmp.pre, tmp.off));
+		}
+		else
+		{
+			pcode.push_back(pCode("LIT", 0, currentTable->findConst(currentNode->child[0]->getInfo())));
+		}
+	}
+}
+
+void Parser::handleCondition(AstNode * n, sTable * s)
+{
+	AstNode* currentNode = n;
+	sTable* currentTable = s;
+	if (currentNode->child[0]->getType() == GrammarSymSpace::ODD)
+	{
+		handleExpression(currentNode->child[1], currentTable);
+		pcode.push_back(pCode("OPR", 0, 6));
+	}
+	else if (currentNode->child[0]->getType() == GrammarSymSpace::EXPRESSION)
+	{
+		handleExpression(currentNode->child[0], currentTable);
+		handleConditionPlus(currentNode->child[1], currentTable);
+	}
+}
+
+void Parser::handleConditionPlus(AstNode * n, sTable * s)
+{
+	AstNode* currentNode = n;
+	sTable* currentTable = s;
+	handleExpression(currentNode->child[1], currentTable);
+	switch (currentNode->child[0]->getType())
+	{
+	case GrammarSymSpace::EQUAL:
+		pcode.push_back(pCode("OPR", 0, 8));
+		return;
+	case GrammarSymSpace::NOTEQUAL:
+		pcode.push_back(pCode("OPR", 0, 9));
+		return;
+	case GrammarSymSpace::LESSTHAN:
+		pcode.push_back(pCode("OPR", 0, 10));
+		return;
+	case GrammarSymSpace::GREATEREQUAL:
+		pcode.push_back(pCode("OPR", 0, 11));
+		return;
+	case GrammarSymSpace::GREATERTHAN:
+		pcode.push_back(pCode("OPR", 0, 12));
+		return;
+	case GrammarSymSpace::LESSEQUAL:
+		pcode.push_back(pCode("OPR", 0, 13));
+		return;
+	default:
+		break;
+	}
+}
+
+void Parser::handleStatement(AstNode * n, sTable * s)
+{
+	AstNode* currentNode = n;
+	sTable* currentTable = s;
+	if (currentNode->child[0]->getType() == GrammarSymSpace::ASSIGHNSTATEMENT)
+	{
+		handleAssignStatement(currentNode->child[0], currentTable);
+	}
+	else if (currentNode->child[0]->getType() == GrammarSymSpace::CALLSTATEMENT)
+	{
+		handleCallStatement(currentNode->child[0], currentTable);
+	}
+	else if (currentNode->child[0]->getType() == GrammarSymSpace::COMPOUNDSTATEMENT)
+	{
+		handleCompoundStatement(currentNode->child[0], currentTable);
+	}
+	else if (currentNode->child[0]->getType() == GrammarSymSpace::CONTIDITIONSTATEMENT)
+	{
+		handleConditionStatement(currentNode->child[0], currentTable);
+	}
+	else if (currentNode->child[0]->getType() == GrammarSymSpace::LOOPSTATEMENT)
+	{
+		handleLoopStatement(currentNode->child[0], currentTable);
+	}
+	else if (currentNode->child[0]->getType() == GrammarSymSpace::READSTATEMENT)
+	{
+		handleReadStatement(currentNode->child[0], currentTable);
+	}
+	else if (currentNode->child[0]->getType() == GrammarSymSpace::WRITESTATEMENT)
+	{
+		handleWriteStatement(currentNode->child[0], currentTable);
+	}
+	else if (currentNode->child[0]->getType() == GrammarSymSpace::REPEATSTATEMENT)
+	{
+		handleRepeatStatement(currentNode->child[0], currentTable);
+	}
+}
+
+void Parser::handleAssignStatement(AstNode * n, sTable * s)
+{
+	AstNode* currentNode = n;
+	sTable* currentTable = s;
+	currentNode = currentNode->child[2];
+	handleExpression(currentNode, currentTable);
+	pos tmp = currentTable->findVar(currentNode->getFather()->child[0]->getInfo());
+	pcode.push_back(pCode("STO", tmp.pre, tmp.off));
+}
+
+void Parser::handleCallStatement(AstNode * n, sTable * s)
+{
+	AstNode* currentNode = n;
+	sTable* currentTable = s;
+	pcode.push_back(pCode("JMP", 0, currentTable->findProcedure(currentNode->child[1]->getInfo())));
+}
+
+void Parser::handleCompoundStatement(AstNode * n, sTable * s)
+{
+	AstNode* currentNode = n;
+	sTable* currentTable = s;
+	handleStatementTable(currentNode->child[1], currentTable);
+}
+
+void Parser::handleConditionStatement(AstNode * n, sTable * s)
+{
+	AstNode* currentNode = n;
+	sTable* currentTable = s;
+	handleCondition(currentNode->child[1], currentTable);
+	pcode.push_back(pCode("JPC", 0, 0x3f3f3f));
+	handleStatement(currentNode->child[3], currentTable);
+	for (int i = pcode.size() - 1; i > -1; --i)
+	{
+		if (pcode[i].op == "JPC" && pcode[i].a2 == 0x3f3f3f)
+		{
+			pcode[i].a2 = pcode.size();
+			break;
+		}
+	}
+	handleConditionStatementPlus(currentNode->child[4], currentTable);
+}
+
+void Parser::handleConditionStatementPlus(AstNode * n, sTable * s)
+{
+	AstNode* currentNode = n;
+	sTable* currentTable = s;
+	if (currentNode->child[0]->getType() == GrammarSymSpace::ELSE)
+	{
+		for (int i = pcode.size() - 1; i > -1; --i)
+		{
+			if (pcode[i].op == "JPC")
+			{
+				++pcode[i].a2;
+				break;
+			}
+		}
+		pcode.push_back(pCode("JPC", 0, 0x3f3f3f));
+		handleStatement(currentNode->child[1], currentTable);
+		for (int i = pcode.size() - 1; i > -1; --i)
+		{
+			if (pcode[i].op == "JPC" && pcode[i].a2 == 0x3f3f3f)
+			{
+				pcode[i].a2 = pcode.size();
+				break;
+			}
+		}
+	}
+}
+
+void Parser::handleLoopStatement(AstNode * n, sTable * s)
+{
+	AstNode* currentNode = n;
+	sTable* currentTable = s;
+	int jump = pcode.size();
+	handleCondition(currentNode->child[1], currentTable);
+	pcode.push_back(pCode("JPC", 0, 0x3f3f3f));
+	//int jump = pcode.size();
+	handleStatement(currentNode->child[3], currentTable);
+	//handleCondition(currentNode->child[1], currentTable);
+	for (int i = pcode.size() - 1; i > -1; --i)
+	{
+		if (pcode[i].op == "JPC" && pcode[i].a2 == 0x3f3f3f)
+		{
+			pcode[i].a2 = pcode.size() + 1;
+			break;
+		}
+	}
+	pcode.push_back(pCode("JMP", 0, jump));
+}
+
+void Parser::handleReadStatement(AstNode * n, sTable * s)
+{
+	AstNode* currentNode = n;
+	sTable* currentTable = s;
+	handleReadVarTable(currentNode->child[2], currentTable);
+}
+
+void Parser::handleReadVarTable(AstNode * n, sTable * s)
+{
+	AstNode* currentNode = n;
+	sTable* currentTable = s;
+	handleReadVar(currentNode->child[0], currentTable);
+	handleReadVarTablePlus(currentNode->child[1], currentTable);
+}
+
+void Parser::handleReadVarTablePlus(AstNode * n, sTable * s)
+{
+	AstNode* currentNode = n;
+	sTable* currentTable = s;
+	if (currentNode->child[0]->getType() == GrammarSymSpace::COMMA)
+	{
+		handleReadVar(currentNode->child[1], currentTable);
+		handleReadVarTablePlus(currentNode->child[2], currentTable);
+	}
+}
+
+void Parser::handleReadVar(AstNode * n, sTable * s)
+{
+	AstNode* currentNode = n;
+	sTable* currentTable = s;
+	pos tmp = currentTable->findVar(currentNode->child[0]->getInfo());
+	pcode.push_back(pCode("RED", tmp.pre, tmp.off));
+}
+
+void Parser::handleWriteStatement(AstNode * n, sTable * s)
+{
+	AstNode* currentNode = n;
+	sTable* currentTable = s;
+	handleWriteExpressionTable(currentNode->child[2], currentTable);
+}
+
+void Parser::handleWriteExpressionTable(AstNode * n, sTable * s)
+{
+	AstNode* currentNode = n;
+	sTable* currentTable = s;
+	handleExpression(currentNode->child[0], currentTable);
+	pcode.push_back(pCode("WRT", 0, 0));
+	handleWriteExpressionTablePlus(currentNode->child[1], currentTable);
+}
+
+void Parser::handleWriteExpressionTablePlus(AstNode * n, sTable * s)
+{
+	AstNode* currentNode = n;
+	sTable* currentTable = s;
+	if (currentNode->child[0]->getType() == GrammarSymSpace::COMMA)
+	{
+		handleExpression(currentNode->child[1], currentTable);
+		pcode.push_back(pCode("WRT", 0, 0));
+		handleWriteExpressionTablePlus(currentNode->child[2], currentTable);
+	}
+}
+
+void Parser::handleRepeatStatement(AstNode * n, sTable * s)
+{
+	AstNode* currentNode = n;
+	sTable* currentTable = s;
+	int jump = pcode.size();
+	handleStatementTable(currentNode->child[1], currentTable);
+	handleCondition(currentNode->child[3], currentTable);
+	pcode.push_back(pCode("JPC", 0, pcode.size() + 2));
+	pcode.push_back(pCode("JMP", 0, jump));
+}
+
+void Parser::handleStatementTable(AstNode * n, sTable * s)
+{
+	AstNode* currentNode = n;
+	sTable* currentTable = s;
+	if (currentNode->child[0]->getType() == GrammarSymSpace::ID)
+	{
+		handleExpression(currentNode->child[2], currentTable);
+		pos tmp = currentTable->findVar(currentNode->child[0]->getInfo());
+		pcode.push_back(pCode("STO", tmp.pre, tmp.off));
+		handleStatementTablePlus(currentNode->child[3], currentTable);
+	}
+	else if (currentNode->child[0]->getType() == GrammarSymSpace::CALL)
+	{
+		pcode.push_back(pCode("JMP", 0, currentTable->findProcedure(currentNode->child[1]->getInfo())));
+		handleStatementTablePlus(currentNode->child[2], currentTable);
+	}
+	else if (currentNode->child[0]->getType() == GrammarSymSpace::BEGIN)
+	{
+		handleStatementTable(currentNode->child[1], currentTable);
+		handleStatementTablePlus(currentNode->child[3], currentTable);
+	}
+	else if (currentNode->child[0]->getType() == GrammarSymSpace::CONTIDITIONSTATEMENT)
+	{
+		handleConditionStatement(currentNode->child[0], currentTable);
+		handleStatementTablePlus(currentNode->child[1], currentTable);
+	}
+	else if (currentNode->child[0]->getType() == GrammarSymSpace::LOOPSTATEMENT)
+	{
+		handleLoopStatement(currentNode->child[0], currentTable);
+		handleStatementTablePlus(currentNode->child[1], currentTable);
+	}
+	else if (currentNode->child[0]->getType() == GrammarSymSpace::READSTATEMENT)
+	{
+		handleReadStatement(currentNode->child[0], currentTable);
+		handleStatementTablePlus(currentNode->child[1], currentTable);
+	}
+	else if (currentNode->child[0]->getType() == GrammarSymSpace::WRITESTATEMENT)
+	{
+		handleWriteStatement(currentNode->child[0], currentTable);
+		handleStatementTablePlus(currentNode->child[1], currentTable);
+	}
+	else if (currentNode->child[0]->getType() == GrammarSymSpace::REPEATSTATEMENT)
+	{
+		handleRepeatStatement(currentNode->child[0], currentTable);
+		handleStatementTablePlus(currentNode->child[1], currentTable);
+	}
+	else if (currentNode->child[0]->getType() == GrammarSymSpace::EMPTY)
+	{
+		handleStatementTablePlus(currentNode->child[1], currentTable);
+	}
+}
+
+void Parser::handleStatementTablePlus(AstNode * n, sTable * s)
+{
+	AstNode* currentNode = n;
+	sTable* currentTable = s;
+	if (currentNode->child[0]->getType() == GrammarSymSpace::SEMICOLON)
+	{
+		handleStatement(currentNode->child[1], currentTable);
+		handleStatementTablePlus(currentNode->child[2], currentTable);
+	}
+}
+
+void Parser::printPCode()
+{
+	for (int i = 0; i < pcode.size(); ++i)
+	{
+		cout << i << "\t" << pcode[i].op << "  " << pcode[i].a1 << "\t" << pcode[i].a2 << "\n";
+	}
+}
+
 

@@ -80,6 +80,16 @@ void symbolTable::addProcedure(string s)
 	p.insert(s);
 }
 
+void symbolTable::addCConst(string s)
+{
+	cc.insert(cNode(s));
+}
+
+void symbolTable::addCConst(string s, int v)
+{
+	cc.insert(cNode(s, v));
+}
+
 void symbolTable::printTable()
 {
 	int js = 1;
@@ -106,4 +116,104 @@ void symbolTable::printTable()
 		cout << *it << " ";
 	}
 	cout << "\n";
+}
+
+sTable::sTable()
+{
+	pre = nullptr;
+}
+
+sTable::sTable(sTable * pres)
+{
+	pre = pres;
+}
+
+sTable * sTable::getPre()
+{
+	return pre;
+}
+
+pos sTable::findVar(string s)
+{
+	int p = 0, o;
+	sTable* tmp = this;
+	while (1)
+	{
+		for (int i = 0; i < tmp->v.size(); ++i)
+		{
+			if (tmp->v[i] == s)
+			{
+				o = 3 + i;
+				return pos(p, o);
+			}
+		}
+		++p;
+		tmp = tmp->getPre();
+	}
+}
+
+int sTable::findConst(string s)
+{
+	sTable* tmp = this;
+	while (1)
+	{
+		if (tmp->c.find(s) != tmp->c.end())
+		{
+			return tmp->c.find(s)->second;
+		}
+		tmp = tmp->getPre();
+	}
+}
+
+int sTable::findProcedure(string s)
+{
+	sTable* tmp = this;
+	while (1)
+	{
+		if (tmp->p.find(s) != tmp->p.end())
+		{
+			return tmp->p.find(s)->second;
+		}
+		tmp = tmp->getPre();
+	}
+}
+
+bool sTable::judgeVarOrConst(string s)
+{
+	sTable* tmp = this;
+	while (1)
+	{
+		if (tmp->c.find(s) != tmp->c.end())
+		{
+			return false;
+		}
+		for (int i = 0; i < tmp->v.size(); ++i)
+		{
+			if (tmp->v[i] == s)
+			{
+				return true;
+			}
+		}
+		tmp = tmp->getPre();
+	}
+}
+
+void sTable::addConst(string s, int v)
+{
+	c.insert(pair<string, int>{s, v});
+}
+
+void sTable::addVar(string s)
+{
+	v.push_back(s);
+}
+
+void sTable::addProcedure(string s)
+{
+	p.insert(pair<string, int>{s, 0x3f3f3f});
+}
+
+void sTable::setProcedure(string s, int v)
+{
+	p.find(s)->second = v;
 }

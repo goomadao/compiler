@@ -1,10 +1,10 @@
-const a=1,b=2;
+const a=11,b=12;
 var c,d,e,i,k;
 procedure get;
-    const f=3,g=4;
+    const f=34,g=24;
     var h,i;
     procedure put;
-        const j=5,k=6;
+        const j=85,k=16;
         var l,m; 
         write(l);
     read(i);

@@ -31,15 +31,15 @@ Grammar::Grammar()
 	getParsingTable();
 	
 	//输出该list
-	cout << "----------------化简文法：------------------\n";
-	printGrammarList();
-	cout << "-----------------first:---------------\n";
-	printFirst();
-	
-	cout << "----------------follow:----------------\n";
-	printFollow();
-	cout << "----------------parsingTable:----------------\n";
-	printParsingTable();
+	//cout << "----------------化简文法：------------------\n";
+	//printGrammarList();
+	//cout << "-----------------first:---------------\n";
+	//printFirst();
+	//
+	//cout << "----------------follow:----------------\n";
+	//printFollow();
+	//cout << "----------------parsingTable:----------------\n";
+	//printParsingTable();
 	
 }
 

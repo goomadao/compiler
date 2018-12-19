@@ -913,11 +913,13 @@ void Parser::genPCode()
 					if (currentNode->getFather()->getType() == GrammarSymSpace::PROCEDUREBODY)
 					{
 						currentTable->getPre()->setProcedure(currentNode->getFather()->getFather()->child[0]->child[1]->getInfo(), pcode.size());//table和procedure id可能定位错误
+						pcode.push_back(pCode("INT", 0, 3 + currentTable->getVarSize()));
 					}
 					else if (currentNode->getFather()->getType() == GrammarSymSpace::DEFINITIONPART)
 					{
 						startJump = pcode.size();
 						pcode[0].a2 = pcode.size();
+						pcode.push_back(pCode("INT", 0, 3 + currentTable->getVarSize()));
 					}
 				}
 				if (currentNode->getType() == GrammarSymSpace::PROCEDUREBODY ||
@@ -952,8 +954,9 @@ void Parser::handleExpression(AstNode * n, sTable * s)
 	else if (currentNode->child[0]->getType() == GrammarSymSpace::MINUS)
 	{
 		//ToDo:表达式开头为-时的做法
-		/*handleTerm(currentNode->child[1], currentTable);
-		handleExpressionPlus(currentNode->child[2], currentTable);*/
+		handleTerm(currentNode->child[1], currentTable);
+		pcode.push_back(pCode("OPR", 0, 1));
+		handleExpressionPlus(currentNode->child[2], currentTable);
 	}
 }
 

@@ -217,3 +217,8 @@ void sTable::setProcedure(string s, int v)
 {
 	p.find(s)->second = v;
 }
+
+int sTable::getVarSize()
+{
+	return v.size();
+}

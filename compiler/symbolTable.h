@@ -90,6 +90,7 @@ public:
 	void addVar(string s);
 	void addProcedure(string s);
 	void setProcedure(string s, int v);
+	int getVarSize();
 };
 
 
